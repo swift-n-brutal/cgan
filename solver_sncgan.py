@@ -5,11 +5,11 @@ import tensorflow as tf
 from time import time
 from argparse import ArgumentParser
 
-from tfbox_v4.config import NP_DTYPE, TF_DTYPE
-from tfbox_v4.solvers import Solver
-from tfbox_v4.layers import Accuracy
-from tfbox_v4.util.test_gan_util import gen_seed
-from tfbox_v4.dataloaders import RandDataLoaderPrefetch, ImageTransformer
+from tfbox.config import NP_DTYPE, TF_DTYPE
+from tfbox.solvers import Solver
+from tfbox.layers import Accuracy
+from tfbox.util.test_gan_util import gen_seed
+from tfbox.dataloaders import RandDataLoaderPrefetch, ImageTransformer
 
 from celeba_dataloader import CelebADataLoader
 from model_vae import Encoder as m_dis, Decoder as m_gen
@@ -53,7 +53,7 @@ class SolverSNCGAN(Solver):
         condition = tf.placeholder(TF_DTYPE, shape=cond_shape, name='condition')
         image = tf.placeholder(TF_DTYPE, shape=img_shape, name='image')
         # model producers
-        args['max_chn'] = 512
+        #args['max_chn'] = 512
         args['input_chn'] = img_chn
         G = m_gen(args, name='G')
         args['noise_size'] = 1
@@ -311,7 +311,7 @@ class SolverSNCGAN(Solver):
             test_gen_img = self.get_plottable_data_numpy(test_gen_img)
             #
             output_file = osp.join(self.save_dir, 'results_test_only%d.npz' % (itr if itr is not None else 0))
-            np.savez(output_file, img=test_img, gen_img=test_gen_img)
+            np.savez(output_file, img=test_img, gen_img=test_gen_img, condition=condition)
             return {}
         else:
             feed_dict = { 
@@ -339,10 +339,10 @@ class SolverSNCGAN(Solver):
         args.lr_update_every = int(args.lr_update_every*tob)
         #
         args.save_dir = osp.join(args.save_dir,
-                "%s_lr%s_bs%dt%d_ns%d_fc%d_d%dg%d" % (
+                "%s_lr%s_bs%dt%d_ns%d_fc%d_maxc%d_d%dg%d" % (
                     args.name, strf(args.lr),
                     args.batch_size, args.target_batch_size,
-                    args.noise_size, args.first_chn,
+                    args.noise_size, args.first_chn, args.max_chn,
                     args.d_iter, args.g_iter))
         #
         if args.no_bn:
@@ -381,6 +381,7 @@ class SolverSNCGAN(Solver):
         ps.add_argument('--input_size', type=int, default=64)
         ps.add_argument('--img_chn', type=int, default=3)
         ps.add_argument('--first_chn', type=int, default=32)
+        ps.add_argument('--max_chn', type=int, default=512)
         ps.add_argument('--noise_size', type=int, default=128)
         ps.add_argument('--depth', type=int, default=-1)
         ps.add_argument('--gstd', type=float, default=-1)
@@ -388,7 +389,7 @@ class SolverSNCGAN(Solver):
         ps.add_argument('--no_bn', action='store_true', default=False)
         # solver
         ps.add_argument('--name', type=str, default='sn_cgan')
-        ps.add_argument('--lr', type=float, default=0.0002)
+        ps.add_argument('--lr', type=float, default=0.00002)
         ps.add_argument('--mom', type=float, default=0.5)
         ps.add_argument('--mom2', type=float, default=0.99)
         ps.add_argument('--lr_update_after', type=int, default=64000)
@@ -403,7 +404,7 @@ class SolverSNCGAN(Solver):
         ps.add_argument('--max_to_keep', type=int, default=10)
         ps.add_argument('--test_first', action='store_true', default=False)
         ps.add_argument('--test_only', action='store_true', default=False)
-        ps.add_argument('--d_iter', type=int, default=2, help='# updates of d per step')
+        ps.add_argument('--d_iter', type=int, default=5, help='# updates of d per step')
         ps.add_argument('--g_iter', type=int, default=1, help='# updates of g per step')
         ps.add_argument('--cpu_only', action='store_true', default=False)
         #
@@ -416,7 +417,8 @@ def main():
 
     gpu_options = tf.GPUOptions(allow_growth=True)
     config = tf.ConfigProto(
-            allow_soft_placement=True)
+            allow_soft_placement=True,
+            gpu_options=gpu_options)
     with tf.Session(config=config) as sess:
         solver = SolverSNCGAN(args, sess)
         print "Before train/test"
