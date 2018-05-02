@@ -371,7 +371,7 @@ class SolverSNCGAN(Solver):
             ps = ArgumentParser()
         # dataset
         ps.add_argument('--folder', type=str, default='/DATA/sw015/img_align_celeba')
-        ps.add_argument('--names', type=str, default='/DATA/sw015/img_align_celeba/names_with_attr.txt')
+        ps.add_argument('--names', type=str, default='/DATA/sw015/img_align_celeba/list_attr_celeba.txt')
         ps.add_argument('--queue_size', type=int, default=2)
         ps.add_argument('--nproc', type=int, default=2)
         # network

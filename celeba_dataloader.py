@@ -14,8 +14,8 @@ import zlib
 import os.path as osp
 from scipy import misc
 
-from tfbox_v4.config import NP_DTYPE as DTYPE
-from tfbox_v4.dataloaders import ImageTransformer
+from tfbox.config import NP_DTYPE as DTYPE
+from tfbox.dataloaders import ImageTransformer
 
 import signal
 class Handler:
@@ -56,7 +56,12 @@ class CelebADataLoader(object):
         name_list = []
         attr_list = []
         if self.with_attr:
+            i = 0
             for line in fnames:
+                i += 1
+                if i <= 2:
+                    # skip the line counter and header
+                    continue
                 line = line.rstrip('\n')
                 line = line.rstrip('\r')
                 name, attr_str = line.split(' ', 1)
