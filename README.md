@@ -13,15 +13,15 @@ Implementation of Conditional Generative Adversarial Networks using [tfbox](http
 
 ## Setup
 
-- Download [tfbox](https://github.com/swift-n-brutal/tfbox) and append its path to 'PYTHONPATH'
-'''
+- Download [tfbox](https://github.com/swift-n-brutal/tfbox) and append its path to `PYTHONPATH`
+```
 git clone https://github.com/swift-n-brutal/tfbox
 export PYTHONPATH=$PYTHONPATH:/path/to/tfbox
-'''
+```
 
 ## Training CGAN on CelebA Dataset
-- Download (CelebA)[http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html] dataset with attributes annotations.
+- Download [CelebA](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) dataset with attributes annotations.
 - Training command
-'''
+```
 CUDA_VISIBLE_DEVICES=0 python solver_sncgan.py --folder /path/to/img_align_celeba --names /path/to/list_attr_celeba.txt
-'''
+```
